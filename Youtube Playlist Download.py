@@ -2,16 +2,17 @@ from pytube import Playlist, YouTube
 import time
 import os
 import urllib.request
+import sys
 
-def folderExists(SAVE_PATH=r"C:\Users\anupm\Downloads\youtubeList"):
+def folderExists(SAVE_PATH, folderName):
     """
     Check whether the downloading folder is present or not. If not then create it
     """
     if not os.path.exists(SAVE_PATH):
         os.makedirs(SAVE_PATH)
-        print("folder is created in Downloads...")
+        print(folderName, " folder is created in Downloads...")
     else:
-        print("folder already exists....")
+        print(folderName, " folder already exists....")
 
 def renameingFile(SAVE_PATH, title, index):
     """
@@ -31,7 +32,7 @@ def renameingFile(SAVE_PATH, title, index):
     print("Successfully Rename")
     int(index)
 
-def downloadFile(playlist, from_download, SAVE_PATH=r"C:\Users\anupm\Downloads\youtubeList"):
+def downloadFile(playlist, from_download, SAVE_PATH):
     """
     Download the file by extracting the playlist and saving it.
     """
@@ -82,13 +83,13 @@ def downloadFile(playlist, from_download, SAVE_PATH=r"C:\Users\anupm\Downloads\y
 if __name__ == "__main__":
     playlist = Playlist('https://www.youtube.com/playlist?list=PLbGui_ZYuhigchy8DTw4pX4duTTpvqlh6')
     # start from 1 to length of playlist
-    from_download = 29
+    from_download = 1
 
     try:
         folderName = playlist.title
-        SAVE_PATH = r"C:\Users\anupm\Downloads\\" +  folderName
+        SAVE_PATH = os.path.expanduser("~")+"\\Downloads\\" +  folderName
         try:
-            folderExists(SAVE_PATH)
+            folderExists(SAVE_PATH, folderName)
             downloadFile(playlist, from_download, SAVE_PATH)
         except urllib.error.URLError:
             print("Internet is off, please check your connection.")
