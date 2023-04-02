@@ -20,12 +20,11 @@ def renameingFile(SAVE_PATH, title, index):
     """
     print("Renaming...")
 
-    # avoid_symbols = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', '\'', '.', ',']
-    # for symbol in avoid_symbols:
-    #    for char in title:
-     #       if symbol == char :
-      #          title = title.replace(char, '')
-      title = ''.join(char for char in title if char not in avoid_symbols)
+    avoid_symbols = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', '\'', '.', ',']
+    for symbol in avoid_symbols:
+        for char in title:
+            if symbol == char :
+                title = title.replace(char, '')            
                 
     old_name = SAVE_PATH + r"\{}.mp4".format(title)
     new_name = SAVE_PATH + r"\[ -- {} -- ] {}.mp4".format(str(index), title)
