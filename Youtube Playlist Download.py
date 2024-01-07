@@ -3,6 +3,8 @@ import time
 import os
 import urllib.request
 import sys
+# from pytube.cli import on_progress
+
 
 def folderExists(SAVE_PATH, folderName):
     """
@@ -37,6 +39,7 @@ def downloadFile(playlist, from_download, SAVE_PATH):
     """
     Download the file by extracting the playlist and saving it.
     """
+    failed = []
     index = 1
     # Count the total number of videos in playlist
     print('Number of videos in playlist: %s' % len(playlist.video_urls))
@@ -49,20 +52,23 @@ def downloadFile(playlist, from_download, SAVE_PATH):
             # download from specific video
             if from_download == index:
                 start_time = time.perf_counter()     # Start to count the time
-                # Check whether the video is available
                 try:
-                    yt = YouTube(url)
-                except VideoUnavailable:
-                    print("URL is invalid. Please check the url.")
-                else:
                     # Download the video
-                    yt.streams.filter(file_extension='mp4', adaptive=True, res='720p')
-                    print("Index  : ", index)
-                    print('Name  : ', yt.title)
-                    print('Link     : ', url)
-                    stream = yt.streams.get_by_itag(22)
+                    yt = YouTube(url, use_oauth=True, allow_oauth_cache=True) #, on_progress_callback= on_progress
+                    print(f"Index  : {index} \nName  : {yt.title} \nLink     : {url}")
+                    #yt.streams.filter(file_extension='mp4', adaptive=True, res='720p')
+                    #stream = yt.streams.get_by_itag(22)
+                    stream = yt.streams.get_highest_resolution()
                     stream.download(SAVE_PATH)
-
+                except Exception as e :
+                    print(f"Download Failed \nReason : ", e)
+                    failed_video = [index, yt.title, url]
+                    failed.append(failed_video)
+                    index+=1
+                    from_download+=1
+                    print('-'*70)
+                    continue
+                else:
                     stop_time = time.perf_counter()      # Stop to count the time
                     print('Download Successfully....')
                     
@@ -77,24 +83,36 @@ def downloadFile(playlist, from_download, SAVE_PATH):
         print("Youtube Playlist is unavailable")
 
     # Check whether the all videos are downloaded or not
-    if index > 1:
+    if len(playlist.video_urls) == index:
         print("All Videos are downloaded")
+    return failed
         
 
 if __name__ == "__main__":
-    playlist = Playlist('https://www.youtube.com/playlist?list=PLbGui_ZYuhigchy8DTw4pX4duTTpvqlh6')
-    # start from 1 to length of playlist
-    from_download = 1
-
-    try:
+    try :
+        playlist = Playlist('https://www.youtube.com/playlist?list=PLvZGzNEo-9lEOE7dyQYBbADqzB-aTxV0C')
+        # start from 1 to length of playlist
+        from_download = 1
         folderName = playlist.title
         SAVE_PATH = os.path.expanduser("~")+"\\Downloads\\" +  folderName
-        try:
-            folderExists(SAVE_PATH, folderName)
-            downloadFile(playlist, from_download, SAVE_PATH)
-        except urllib.error.URLError:
-            print("Internet is off, please check your connection.")
-    except Exception:
-        print("URL is Incorrect")
+        folderExists(SAVE_PATH, folderName)
+        print(downloadFile(playlist, from_download, SAVE_PATH))
+    except KeyError:
+        print("Playlist URL is Incorrect")
+    except urllib.error.URLError:
+        print("Internet is off, please check your connection.")
+    except Exception as e:
+        print("Something wents wrong \n Reason : ", e)
+
+#    try:
+#        folderName = playlist.title
+#        SAVE_PATH = os.path.expanduser("~")+"\\Downloads\\" +  folderName
+#        try:
+#            folderExists(SAVE_PATH, folderName)
+#            downloadFile(playlist, from_download, SAVE_PATH)
+#        except urllib.error.URLError:
+#            print("Internet is off, please check your connection.")
+#    except Exception:
+#        print("URL is Incorrect")
         
     
