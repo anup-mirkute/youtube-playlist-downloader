@@ -1,4 +1,5 @@
 from pytube import Playlist, YouTube
+from clrprint import *
 import time
 import os
 import urllib.request
@@ -31,8 +32,32 @@ def renameingFile(SAVE_PATH, title, index):
                 
     old_name = SAVE_PATH + r"\{}.mp4".format(title)
     new_name = SAVE_PATH + r"\[ -- {} -- ] {}.mp4".format(str(index), title)
-    os.rename(old_name, new_name)
-    print("Successfully Rename")
+
+    if os.path.exists(new_name):
+        clrprint(f"File already exists...", clr='r')
+        print(f"File Path : {new_name}")
+        choice = input("\nDo you want to save the file (y/n) : ")
+
+        count = 0
+        while True :
+            if choice == 'y' :
+                if not os.path.exists(new_name):
+                    os.rename(old_name, new_name)
+                    clrprint("Successfully Renamed", clr='g')
+                    break
+                else:
+                    count += 1
+                    new_name = SAVE_PATH + r"\[ -- {} -- ] {} - ({}).mp4".format(str(index), title, str(count))
+            elif choice == 'n':
+                os.remove(old_name) if os.path.exists(old_name) else print("The file does not exist")
+                break
+            else :
+                clrprint('Please Select Approoriate option', clr='r')
+                choice = input("\nDo you want to save the file (y/n) : ")
+    else :
+        os.rename(old_name, new_name)
+        clrprint("Successfully Renamed", clr='g')
+        
     int(index)
 
 def downloadFile(playlist, from_download, SAVE_PATH):
@@ -61,7 +86,7 @@ def downloadFile(playlist, from_download, SAVE_PATH):
                     stream = yt.streams.get_highest_resolution()
                     stream.download(SAVE_PATH)
                 except Exception as e :
-                    print(f"Download Failed \nReason : ", e)
+                    clrprint(f"Download Failed \nReason : ", e, clr='r')
                     failed_video = [index, yt.title, url]
                     failed.append(failed_video)
                     index+=1
@@ -70,7 +95,7 @@ def downloadFile(playlist, from_download, SAVE_PATH):
                     continue
                 else:
                     stop_time = time.perf_counter()      # Stop to count the time
-                    print('Download Successfully....')
+                    clrprint('Download Successfully....', clr='g')
                     
                     # Calculating the time to download
                     print(f'Time    : {stop_time - start_time:0.2f} seconds \n')
@@ -83,14 +108,15 @@ def downloadFile(playlist, from_download, SAVE_PATH):
         print("Youtube Playlist is unavailable")
 
     # Check whether the all videos are downloaded or not
-    if len(playlist.video_urls) == index:
+
+    if len(playlist.video_urls) == (index - 1):
         print("All Videos are downloaded")
     return failed
         
 
 if __name__ == "__main__":
     try :
-        playlist = Playlist('https://www.youtube.com/playlist?list=PLvZGzNEo-9lEOE7dyQYBbADqzB-aTxV0C')
+        playlist = Playlist('https://www.youtube.com/playlist?list=PLjVLYmrlmjGdIVmcu5nfgE68jANQetnOX')
         # start from 1 to length of playlist
         from_download = 1
         folderName = playlist.title
